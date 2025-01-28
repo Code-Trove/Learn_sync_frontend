@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { SearchResult } from "@/types";
+import Image from "next/image";
 
 interface ChatBotProps {
   onSearch: (query: string, reset?: boolean) => Promise<void>;
@@ -157,7 +158,7 @@ export function ChatBot({ onSearch, results, loading }: ChatBotProps) {
           </h2>
           <div className="flex justify-center">
             {/* Dynamically display the image from results.link */}
-            <img
+            <Image
               src={imageLink}
               alt="Sidebar Content"
               className="w-full h-auto rounded-lg"
