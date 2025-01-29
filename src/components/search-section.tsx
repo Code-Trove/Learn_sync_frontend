@@ -43,7 +43,7 @@ export function ChatBot({ onSearch, results, loading }: ChatBotProps) {
         setSidebarVisible(true);
       }
     }
-  }, [results]);
+  }, [results, imageLink]);
 
   const handleKeyDown = async (
     event: React.KeyboardEvent<HTMLInputElement>
@@ -64,7 +64,8 @@ export function ChatBot({ onSearch, results, loading }: ChatBotProps) {
         if (resetFlag) {
           setResetFlag(false); // Reset after the first query in the new conversation
         }
-      } catch (error) {
+      } catch (error: unknown) {
+        console.error("Search error:", error);
         // Handle errors and update the response in the conversation
         setConversation((prev) =>
           prev.map((entry, idx) =>
@@ -162,6 +163,8 @@ export function ChatBot({ onSearch, results, loading }: ChatBotProps) {
               src={imageLink}
               alt="Sidebar Content"
               className="w-full h-auto rounded-lg"
+              width={200}
+              height={200}
             />
           </div>
         </div>
