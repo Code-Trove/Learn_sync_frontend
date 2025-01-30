@@ -11,6 +11,20 @@ import { FaGoogle, FaGithub } from "react-icons/fa";
 import { HiLockClosed } from "react-icons/hi";
 import Image from "next/image";
 import Main from "../assets/images/main.png";
+import { InfiniteScroll } from "@/components/infinite-scroll";
+
+const logos = [
+  "Logo 1",
+  "Logo 2",
+  "Logo 3",
+  "Logo 4",
+  "Logo 5",
+  "Logo 6",
+  "Logo 7",
+  "Logo 8",
+  "Logo 9",
+  "Logo 10",
+];
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -186,7 +200,16 @@ export default function SignupPage() {
             height={800}
             className="-mr-32"
           />
-          <h1>Company</h1>
+          <InfiniteScroll duration={30} direction="left" loop={true}>
+            {logos.map((logo, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-center w-40 h-20  rounded-lg"
+              >
+                {logo}
+              </div>
+            ))}
+          </InfiniteScroll>
         </div>
       </div>
     </div>
