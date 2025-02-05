@@ -3,11 +3,11 @@
 
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
-import { Navigation } from "@/components/navigation";
+// import { Navigation } from "@/components/navigation";
 import { ChatBot } from "@/components/search-section";
-import { KanbanBoard } from "@/components/kanban-board";
+// import { KanbanBoard } from "@/components/kanban-board";
 import { SearchResult, KanbanColumn } from "@/types";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import Sidebar from "@/components/Sidebar";
 
 export default function HomePage() {
@@ -16,45 +16,45 @@ export default function HomePage() {
   const [cookies] = useCookies(["jwt"]);
   const [conversationId, setConversationId] = useState<string | null>(null);
 
-  const columns: KanbanColumn[] = [
-    {
-      id: "1",
-      title: "Unassigned",
-      count: 2,
-      items: [
-        {
-          id: "1",
-          title: "This is a place to plan your content",
-          description:
-            "Save your Ideas before converting them into posts. Brainstorm, plan ahead, and refine!",
-        },
-      ],
-    },
-    {
-      id: "2",
-      title: "To Do",
-      count: 0,
-      items: [],
-    },
-    {
-      id: "3",
-      title: "In Progress",
-      count: 1,
-      items: [
-        {
-          id: "2",
-          title: "Buffer",
-          description: "Making you baby",
-        },
-      ],
-    },
-    {
-      id: "4",
-      title: "Done",
-      count: 0,
-      items: [],
-    },
-  ];
+  // const columns: KanbanColumn[] = [
+  //   {
+  //     id: "1",
+  //     title: "Unassigned",
+  //     count: 2,
+  //     items: [
+  //       {
+  //         id: "1",
+  //         title: "This is a place to plan your content",
+  //         description:
+  //           "Save your Ideas before converting them into posts. Brainstorm, plan ahead, and refine!",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     id: "2",
+  //     title: "To Do",
+  //     count: 0,
+  //     items: [],
+  //   },
+  //   {
+  //     id: "3",
+  //     title: "In Progress",
+  //     count: 1,
+  //     items: [
+  //       {
+  //         id: "2",
+  //         title: "Buffer",
+  //         description: "Making you baby",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     id: "4",
+  //     title: "Done",
+  //     count: 0,
+  //     items: [],
+  //   },
+  // ];
   const fetchResults = async (query: string, reset = false) => {
     // Allow reset to proceed even if query is empty
     if (!query.trim() && !reset) return;
