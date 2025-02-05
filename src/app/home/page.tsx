@@ -8,6 +8,7 @@ import { ChatBot } from "@/components/search-section";
 import { KanbanBoard } from "@/components/kanban-board";
 import { SearchResult, KanbanColumn } from "@/types";
 import { Button } from "@/components/ui/button";
+import Sidebar from "@/components/Sidebar";
 
 export default function HomePage() {
   const [results, setResults] = useState<SearchResult | null>(null);
@@ -99,22 +100,14 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Navigation />
-      <main className="container mx-auto py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Create</h1>
-          <div className="flex items-center space-x-4">
-            <Button variant="outline">Share Feedback</Button>
-            <Button variant="outline">Tags</Button>
-            <Button variant="outline">Board</Button>
-            <Button variant="outline">Gallery</Button>
-            <Button>New Idea</Button>
-          </div>
-        </div>
-        <ChatBot onSearch={fetchResults} results={results} loading={loading} />
-        <KanbanBoard initialColumns={columns} />
-      </main>
+    <div className="min-h-screen bg-gray-100 flex">
+      <div className="w-64 flex-shrink-0">
+      <Sidebar />
+      </div>
+      <div className="flex-1">
+      <ChatBot onSearch={fetchResults} results={results} loading={loading} />
+      {/* <KanbanBoard initialColumns={columns} /> */}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
-import { SearchResult } from "@/types";
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import type { SearchResult } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
 interface ChatBotProps {
@@ -14,10 +18,10 @@ export function ChatBot({ onSearch, results, loading }: ChatBotProps) {
     { query: string; response: string; link?: string }[]
   >([]);
   const [imageLink, setImageLink] = useState<string>("");
-  const [resetFlag, setResetFlag] = useState<boolean>(false); // Track reset state
-  const [sidebarVisible, setSidebarVisible] = useState<boolean>(false); // Control sidebar visibility
+  const [resetFlag, setResetFlag] = useState<boolean>(false);
+  const [sidebarVisible, setSidebarVisible] = useState<boolean>(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Update conversation when new results arrive
   useEffect(() => {
     if (results) {
       setConversation((prev) => {
@@ -32,41 +36,40 @@ export function ChatBot({ onSearch, results, loading }: ChatBotProps) {
           };
         }
         if (results.link) {
-          setImageLink(results.link || "");
+          setImageLink(results.link);
         }
 
         return updated;
       });
 
-      // Show sidebar content if results contain a link
       if (results.link && !sidebarVisible) {
         setSidebarVisible(true);
       }
     }
-  }, [results, imageLink]);
+  }, [results, imageLink, sidebarVisible]);
 
-  const handleKeyDown = async (
-    event: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (event.key === "Enter" && query.trim()) {
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [conversation]);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (query.trim()) {
       const trimmedQuery = query.trim();
       setQuery("");
 
-      // Add user query and placeholder response
       setConversation((prev) => [
         ...prev,
         { query: trimmedQuery, response: "Loading..." },
       ]);
 
       try {
-        // Pass resetFlag to onSearch and toggle it back to false after first query
         await onSearch(trimmedQuery, resetFlag);
         if (resetFlag) {
-          setResetFlag(false); // Reset after the first query in the new conversation
+          setResetFlag(false);
         }
       } catch (error: unknown) {
         console.error("Search error:", error);
-        // Handle errors and update the response in the conversation
         setConversation((prev) =>
           prev.map((entry, idx) =>
             idx === prev.length - 1
@@ -82,83 +85,104 @@ export function ChatBot({ onSearch, results, loading }: ChatBotProps) {
   };
 
   const handleResetConversation = async () => {
-    setConversation([]); // Clear the current conversation
-    setQuery(""); // Reset the query input
-    setResetFlag(true); // Set reset flag to true for the next query
-    setSidebarVisible(false); // Hide sidebar content
+    setConversation([]);
+    setQuery("");
+    setResetFlag(true);
+    setSidebarVisible(false);
     try {
-      await onSearch("", true); // Pass reset flag as true
+      await onSearch("", true);
     } catch (error) {
       console.error("Error resetting conversation:", error);
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Chat Section */}
-      <div className="flex-1 flex flex-col items-center justify-between p-6 bg-white shadow-lg relative">
-        <div className="w-full max-w-3xl">
-          <div className="flex justify-between items-center mb-4">
+    <div className="flex h-screen bg-gray-50">
+      <div className="flex-1">
+        <header className="bg-white border-b border-gray-200 p-4">
+          <div className="max-w-4xl mx-auto flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-800">ChatBot</h1>
-            <button
+            <Button
               onClick={handleResetConversation}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              variant="destructive"
               disabled={loading}
             >
-              End Conversation
-            </button>
+              New Chat
+            </Button>
           </div>
-          <div className="bg-gray-200 p-4 rounded-md h-96 overflow-y-auto shadow-inner">
-            {conversation.map((entry, idx) => (
-              <div key={idx} className="mb-6 animate-fadeIn">
-                <div className="font-semibold text-blue-600">You:</div>
-                <div className="bg-blue-100 text-blue-900 p-3 rounded-lg mt-1">
-                  {entry.query}
-                </div>
-                <div className="font-semibold text-gray-800 mt-3">Bot:</div>
-                <div className="bg-gray-100 text-gray-900 p-3 rounded-lg mt-1">
-                  {entry.response}
-                  {entry.link && (
-                    <a
-                      href={entry.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline block mt-2"
-                    >
-                      Learn More
-                    </a>
-                  )}
-                </div>
+        </header>
+
+        <main className="flex-1 overflow-hidden">
+          <div className="max-w-4xl mx-auto h-full flex flex-col">
+            {conversation.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center">
+                <form onSubmit={handleSubmit} className="w-full max-w-md">
+                  <Input
+                    type="text"
+                    placeholder="Type your message here..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="w-full"
+                  />
+                </form>
               </div>
-            ))}
-            {loading && (
-              <div className="text-gray-500 text-center mt-4 animate-pulse">
-                Fetching response...
-              </div>
+            ) : (
+              <>
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {conversation.map((entry, idx) => (
+                    <div key={idx} className="space-y-2">
+                      <div className="flex items-start">
+                        <div className="w-8 h-8 rounded-full bg-gray-300 mr-2 flex-shrink-0" />
+                        <div className="bg-white p-3 rounded-lg shadow max-w-[80%]">
+                          {entry.query}
+                        </div>
+                      </div>
+                      <div className="flex items-start">
+                        <div className="w-8 h-8 rounded-full bg-green-500 mr-2 flex-shrink-0" />
+                        <div className="bg-white p-3 rounded-lg shadow max-w-[80%]">
+                          {entry.response}
+                          {entry.link && (
+                            <a
+                              href={entry.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 underline block mt-2"
+                            >
+                              Learn More
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+                <div className="p-4 border-t border-gray-200">
+                  <form onSubmit={handleSubmit} className="flex space-x-2">
+                    <Input
+                      type="text"
+                      placeholder="Type your message here..."
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button type="submit" disabled={loading}>
+                      Send
+                    </Button>
+                  </form>
+                </div>
+              </>
             )}
           </div>
-          <div className="mt-6 flex gap-2">
-            <input
-              type="text"
-              placeholder="Type your question here and press Enter..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              aria-label="Type your question"
-            />
-          </div>
-        </div>
+        </main>
       </div>
 
-      {/* Sidebar Section */}
       {sidebarVisible && imageLink && (
-        <div className="w-1/3 bg-gray-800 text-white p-6 shadow-lg animate-slideIn">
+        <div className="w-1/3 bg-gray-800 text-white p-6 shadow-lg">
           <h2 className="text-lg font-bold mb-4">
             Content You might have saved
           </h2>
           <div className="flex justify-center">
-            {/* Dynamically display the image from results.link */}
             <Image
               src={imageLink}
               alt="Sidebar Content"
@@ -169,34 +193,6 @@ export function ChatBot({ onSearch, results, loading }: ChatBotProps) {
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .animate-slideIn {
-          animation: slideIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slideIn {
-          from {
-            transform: translateX(100%);
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }
